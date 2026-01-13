@@ -335,7 +335,7 @@ function App() {
 
   return (
     <main className="app">
-      <header className="hero">
+      {/* <header className="hero">
         <div>
           <p className="eyebrow">Bootstrap debugger</p>
           <h1>Client vs bootstrapped user diff</h1>
@@ -344,8 +344,7 @@ function App() {
             against the bootstrap metadata.
           </p>
         </div>
-        <div className="pill ghost">Auto-analyzes as you type</div>
-      </header>
+      </header> */}
 
       <section className="card input-card">
         <div className="card-heading">
