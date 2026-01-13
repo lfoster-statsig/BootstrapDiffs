@@ -2,47 +2,49 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches:
+      - main
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+  contents: write
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: npm
+          node-version: "20"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
+      - name: Build React app
         run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
+      - name: Debug — show build output
+        run: |
+          echo "PWD: $(pwd)"
+          echo "Repo root listing:"
+          ls -la
+          echo
+          if [ -d ./dist ]; then
+            echo ">>> build directory exists — listing first 200 files"
+            find ./dist -type f | sed -n '1,200p'
+            echo "Sizes:"
+            du -sh ./dist || true
+          else
+            echo "ERROR: build directory not found at ./dist"
+            echo "Hint: if you use Vite, Next, or custom scripts the output dir might be 'dist' or 'out'."
+            exit 1
+          fi
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./dist
